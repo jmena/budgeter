@@ -38,7 +38,7 @@
         <deco:input path="amount" label="Amount" />
 
         <button type="submit" class="btn btn-primary">Save</button>
-        <a href="/rules">Go back</a>
+        <a href="/app/rules">Go back</a>
     </form:form>
 
 

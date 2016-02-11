@@ -26,12 +26,6 @@
     <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
             <a class="navbar-brand" href="#">Budget</a>
         </div>
 
@@ -39,9 +33,15 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
 
-                <li><a href="/rules">Rules</a></li>
-                <li><a href="/simulations">Simulations</a></li>
-
+                <li><a href="/app/rules/">Rules</a></li>
+                <li><a href="/app/simulations/">Simulations</a></li>
+                <c:if test="${requestScope.isAdmin}">
+                    <li><a href="/app/admin/">SU</a></li>
+                </c:if>
+                <li><a>
+                    ${requestScope.user}
+                </a>
+                </li>
             </ul>
             <div class="navbar-form navbar-nav">
                 <div class="form-group">
@@ -50,9 +50,6 @@
                 <%--<button type="submit" class="btn btn-success">Sign in</button>--%>
             </div>
         </div>
-        <%--<div id="navbar" class="navbar-collapse collapse">--%>
-            <%----%>
-        <%--</div>--%>
     </div>
 </nav>
 

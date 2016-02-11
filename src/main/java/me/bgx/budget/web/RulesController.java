@@ -33,13 +33,13 @@ import me.bgx.budget.util.PeriodEditor;
 
 @Slf4j
 @Controller
-@RequestMapping(value = "/rules")
+@RequestMapping(value = "/app/rules")
 public class RulesController {
 
     @Autowired
     RulesStorageService rulesStorageService;
 
-    private static final Pattern RULES_PATTERN = Pattern.compile("/rules/([^/]*)/.*");
+    private static final Pattern RULES_PATTERN = Pattern.compile("/app/rules/([^/]*)/.*");
 
     private static final PropertyEditorSupport PERCENTAGE_EDITOR = new PropertyEditorSupport() {
         @Override
@@ -120,7 +120,7 @@ public class RulesController {
         }
         if (rule == null) {
             // couldn't find any rule
-            return new ModelAndView("redirect:/rules/new");
+            return new ModelAndView("redirect:/app/rules/new");
         }
 
         // rule found, let's edit it
@@ -136,7 +136,7 @@ public class RulesController {
             @ModelAttribute("rule") Rule rule,
             BindingResult bindingResult) {
         rulesStorageService.save(rule);
-        return new ModelAndView("redirect:/rules/" + rule.getType() + "/" + rule.getId());
+        return new ModelAndView("redirect:/app/rules/" + rule.getType() + "/" + rule.getId());
     }
 
     @RequestMapping(value = "/new", method = RequestMethod.GET)
@@ -150,9 +150,9 @@ public class RulesController {
         Rule rule = Rule.newInstanceFromType(type);
         if (rule == null) {
             // couldn't find editor for this rule. Let's try again
-            return new ModelAndView("redirect:/rules/new");
+            return new ModelAndView("redirect:/app/rules/new");
         }
-        return new ModelAndView("redirect:/rules/" + rule.getType() + "/new");
+        return new ModelAndView("redirect:/app/rules/" + rule.getType() + "/new");
     }
 
     @ModelAttribute("rule")

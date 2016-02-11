@@ -17,7 +17,7 @@
             <tr>
                 <td>
                     <c:set var="rule" value="${rulesByDescription[description]}" />
-                    <a href="/rules/${rule.type}/${rule.id}">${description} <span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                    <a href="/app/rules/${rule.type}/${rule.id}">${description} <span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
                 </td>
                 <c:forEach var="month" items="${months}">
                     <td class="text-right">

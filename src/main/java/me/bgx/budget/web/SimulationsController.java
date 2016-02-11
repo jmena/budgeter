@@ -24,7 +24,7 @@ import me.bgx.budget.service.RulesStorageService;
 
 @Slf4j
 @Controller
-@RequestMapping(value = "/simulations")
+@RequestMapping(value = "/app/simulations")
 public class SimulationsController {
 
     private static final Double ZERO = 0.0;

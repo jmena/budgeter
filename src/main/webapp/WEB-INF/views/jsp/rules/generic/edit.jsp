@@ -29,7 +29,7 @@
 
     </c:forEach>
 
-    <form:form modelAttribute="rule" action="/rules/${rule.type}/new" cssClass="form-horizontal">
+    <form:form modelAttribute="rule" action="/app/rules/${rule.type}/new" cssClass="form-horizontal">
 
         <form:hidden path="id" />
 
@@ -38,7 +38,7 @@
         </c:forEach>
 
         <button type="submit" class="btn btn-primary">Save</button>
-        <a href="/rules">Go back</a>
+        <a href="/app/rules">Go back</a>
     </form:form>
 
 
