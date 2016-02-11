@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+
+    <display-name>Budget Application</display-name>
+
+    <jsp-config>
+        <jsp-property-group>
+            <url-pattern>*.jsp</url-pattern>
+            <include-prelude>/WEB-INF/jspf/prelude.jspf</include-prelude>
+        </jsp-property-group>
+        <!--<jsp-property-group>-->
+            <!--<url-pattern>*.jsp</url-pattern>-->
+            <!---->
+        <!--</jsp-property-group>-->
+    </jsp-config>
+
+    <!-- For web context -->
+    <servlet>
+        <servlet-name>app-dispatcher</servlet-name>
+        <servlet-class>
+            org.springframework.web.servlet.DispatcherServlet
+        </servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>/WEB-INF/spring-web-config.xml</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>app-dispatcher</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+    <!-- For root context -->
+    <listener>
+        <listener-class>
+            org.springframework.web.context.ContextLoaderListener
+        </listener-class>
+    </listener>
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/spring-core-config.xml</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>org.mortbay.jetty.servlet.SessionURL</param-name>
+        <param-value>none</param-value>
+    </context-param>
+
+    <filter>
+        <filter-name>ObjectifyFilter</filter-name>
+        <filter-class>com.googlecode.objectify.ObjectifyFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>ObjectifyFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+
+
+</web-app>

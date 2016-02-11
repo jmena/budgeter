@@ -1,0 +1,7 @@
+.budget-currency {
+    /*font-family: monospace;*/
+    font-size: 85%;
+}
+.budget-negative {
+    color: #D00;
+}
