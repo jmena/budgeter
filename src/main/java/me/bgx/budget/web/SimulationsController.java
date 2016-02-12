@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +18,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.google.appengine.api.users.User;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bgx.budget.model.v1.Amount;
 import me.bgx.budget.model.v1.Rule;
-import me.bgx.budget.service.RulesStorageService;
+import me.bgx.budget.autowired.RulesStorageService;
+import me.bgx.budget.util.RequestHelper;
 
 @Slf4j
 @Controller
@@ -69,9 +74,10 @@ public class SimulationsController {
     RulesStorageService rulesStorageService;
 
     @RequestMapping(method = RequestMethod.GET)
-    public ModelAndView list() {
+    public ModelAndView list(HttpServletRequest req) {
+        User user = RequestHelper.getUser(req);
         // Collection<Amount> amounts = allAmounts().stream().filter(between(from, to)).collect(Collectors.toList());
-        Collection<Amount> amounts = allAmounts();
+        Collection<Amount> amounts = allAmounts(user.getUserId());
 
         YearMonth minMonth = MAX_DATE;
         YearMonth maxMonth = MIN_DATE;
@@ -172,9 +178,9 @@ public class SimulationsController {
         return strs;
     }
 
-    private Collection<Amount> allAmounts() {
+    private Collection<Amount> allAmounts(String userId) {
         Collection<Amount> amounts = new ArrayList<>();
-        for (Rule rule : rulesStorageService.list()) {
+        for (Rule rule : rulesStorageService.list(userId)) {
             amounts.addAll(rule.generate());
         }
         return amounts;

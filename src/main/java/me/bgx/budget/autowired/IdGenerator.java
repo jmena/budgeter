@@ -1,4 +1,4 @@
-package me.bgx.budget.service;
+package me.bgx.budget.autowired;
 
 
 import java.util.Random;

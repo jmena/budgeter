@@ -16,6 +16,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -122,6 +123,11 @@ public abstract class Rule {
         }
         return sortedMap;
     }
+
+    @Setter
+    @Getter
+    @Index
+    private String userId;
 
     @Id
     @Setter

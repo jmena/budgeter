@@ -2,7 +2,7 @@
 <%@ attribute name="cssClass" type="java.lang.String" %>
 
 <deco:html>
-<div class="${(empty classId) ? 'container' : cssClass}">
+<div class="${(empty cssClass) ? 'container' : cssClass}">
 <jsp:doBody/>
 </div><!--container-->
 </deco:html>
