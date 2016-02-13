@@ -20,21 +20,28 @@ public class RulesStorageService {
 
     @Autowired
     @Setter
+    AuthenticationService auth;
+
+    @Autowired
+    @Setter
     IdGenerator idGenerator;
 
-    public Rule get(String userId, String id) {
+    public Rule get(String id) {
+        String userId = getUserId();
         Preconditions.checkNotNull(userId);
         if (Strings.isNullOrEmpty(userId) || Strings.isNullOrEmpty(id)) {
             return null;
         }
         Rule rule = ofy().load().type(Rule.class).id(id).now();
-        if (!userId.equals(rule.getUserId())) {
+        if (rule != null && !userId.equals(rule.getUserId())) {
             return null;
         }
         return rule;
     }
 
-    public void save(String userId, Rule rule) {
+    public void save(Rule rule) {
+        String userId = getUserId();
+        Preconditions.checkNotNull(rule);
         Preconditions.checkNotNull(userId);
         if (Strings.isNullOrEmpty(rule.getId()) || "new".equals(rule.getId())) {
             rule.setId(idGenerator.newId());
@@ -43,18 +50,24 @@ public class RulesStorageService {
         ofy().save().entity(rule);
     }
 
-    public void delete(String userId, String id) {
+    public void delete(String id) {
+        String userId = getUserId();
         Preconditions.checkNotNull(userId);
-        Rule rule = get(userId, id);
-        if (!userId.equals(rule.getUserId())) {
+        Rule rule = get(id);
+        if (rule == null && !userId.equals(rule.getUserId())) {
             return;
         }
         ofy().delete().type(Rule.class).id(id).now();
     }
 
-    public Collection<? extends Rule> list(String userId) {
+    public Collection<? extends Rule> list() {
+        String userId = getUserId();
         Preconditions.checkNotNull(userId);
         List<Rule> rules = ofy().load().type(Rule.class).filter("userId", userId).list();
         return rules;
+    }
+
+    private String getUserId() {
+        return auth.getUserId();
     }
 }

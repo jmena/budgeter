@@ -25,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import me.bgx.budget.model.v1.Amount;
 import me.bgx.budget.model.v1.Rule;
 import me.bgx.budget.autowired.RulesStorageService;
-import me.bgx.budget.util.RequestHelper;
 
 @Slf4j
 @Controller
@@ -75,9 +74,8 @@ public class SimulationsController {
 
     @RequestMapping(method = RequestMethod.GET)
     public ModelAndView list(HttpServletRequest req) {
-        User user = RequestHelper.getUser(req);
         // Collection<Amount> amounts = allAmounts().stream().filter(between(from, to)).collect(Collectors.toList());
-        Collection<Amount> amounts = allAmounts(user.getUserId());
+        Collection<Amount> amounts = allAmounts();
 
         YearMonth minMonth = MAX_DATE;
         YearMonth maxMonth = MIN_DATE;
@@ -178,9 +176,9 @@ public class SimulationsController {
         return strs;
     }
 
-    private Collection<Amount> allAmounts(String userId) {
+    private Collection<Amount> allAmounts() {
         Collection<Amount> amounts = new ArrayList<>();
-        for (Rule rule : rulesStorageService.list(userId)) {
+        for (Rule rule : rulesStorageService.list()) {
             amounts.addAll(rule.generate());
         }
         return amounts;

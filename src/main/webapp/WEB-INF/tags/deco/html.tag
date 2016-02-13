@@ -17,7 +17,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-tokenfield/0.12.0/css/bootstrap-tokenfield.min.css" />
     <link rel="stylesheet" href="/resources/core/css/budget.css"  />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-
 </head>
 
 <body>
@@ -38,9 +37,8 @@
                 <c:if test="${requestScope.isAdmin}">
                     <li><a href="/app/admin/">SU</a></li>
                 </c:if>
-                <li><a>
-                    ${requestScope.user} - ${requestScope.user.userId}
-                </a>
+                <li>
+                    <a>${pageContext.request.user.email}</a>
                 </li>
             </ul>
             <div class="navbar-form navbar-nav">

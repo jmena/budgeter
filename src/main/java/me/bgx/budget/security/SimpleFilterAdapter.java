@@ -8,7 +8,10 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-public class FilterAdapter implements Filter {
+/**
+ * No code here
+ */
+class SimpleFilterAdapter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {

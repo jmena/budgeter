@@ -9,14 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.google.appengine.api.users.User;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import lombok.extern.slf4j.Slf4j;
 import me.bgx.budget.autowired.RulesStorageService;
 import me.bgx.budget.model.v1.Rule;
-import me.bgx.budget.util.RequestHelper;
 
 @Slf4j
 @Controller
@@ -32,8 +30,7 @@ public class SuperUserController {
 
     @RequestMapping(value = "/export", method = RequestMethod.GET)
     public ModelAndView export(HttpServletRequest req) {
-        User user = RequestHelper.getUser(req);
-        Collection<? extends Rule> rules = rulesStorageService.list(user.getUserId());
+        Collection<? extends Rule> rules = rulesStorageService.list();
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String json = gson.toJson(rules);

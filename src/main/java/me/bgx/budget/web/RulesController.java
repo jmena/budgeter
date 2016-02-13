@@ -26,12 +26,11 @@ import com.google.appengine.api.users.User;
 import com.google.common.base.Strings;
 
 import lombok.extern.slf4j.Slf4j;
-import me.bgx.budget.model.v1.Rule;
 import me.bgx.budget.autowired.RulesStorageService;
+import me.bgx.budget.model.v1.Rule;
 import me.bgx.budget.util.EditorDescription;
 import me.bgx.budget.util.LocalDateEditor;
 import me.bgx.budget.util.PeriodEditor;
-import me.bgx.budget.util.RequestHelper;
 
 @Slf4j
 @Controller
@@ -105,17 +104,15 @@ public class RulesController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ModelAndView list(HttpServletRequest req) {
-        User user = RequestHelper.getUser(req);
-        return new ModelAndView("rules/list").addObject("rules", rulesStorageService.list(user.getUserId()));
+    public ModelAndView list() {
+        return new ModelAndView("rules/list").addObject("rules", rulesStorageService.list());
     }
 
     @RequestMapping(value = "/{type}/{id}", method = RequestMethod.GET)
-    public ModelAndView newOrEditRule(@PathVariable String type, @PathVariable String id, HttpServletRequest req) {
-        User user = RequestHelper.getUser(req);
+    public ModelAndView newOrEditRule(@PathVariable String type, @PathVariable String id) {
         Rule rule = null;
         if (id != null && !"new".equals(id) && !Strings.isNullOrEmpty(id)) {
-            rule = rulesStorageService.get(user.getUserId(), id);
+            rule = rulesStorageService.get(id);
         }
         if (rule == null) {
             // rule doesn't exist, create a new one
@@ -140,8 +137,7 @@ public class RulesController {
             BindingResult bindingResult,
             HttpServletRequest req)
     {
-        User user = RequestHelper.getUser(req);
-        rulesStorageService.save(user.getUserId(), rule);
+        rulesStorageService.save(rule);
         return new ModelAndView("redirect:/app/rules/" + rule.getType() + "/" + rule.getId());
     }
 
