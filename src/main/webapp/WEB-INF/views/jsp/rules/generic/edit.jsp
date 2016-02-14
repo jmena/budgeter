@@ -19,14 +19,14 @@
     </c:if>
     <c:if test="${hasErrors}">
         <div class="alert alert-danger" role="alert">
-                <%--<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>--%>
-                <%--<strong>Warning</strong>--%>
-                <%--Couldn't find the rule. Creating a new one.--%>
+            <span class="glyphicon glyphicon-error-sign" aria-hidden="true"></span>
+            <%--<strong>Warning</strong>--%>
+            <%--Couldn't find the rule. Creating a new one.--%>
             <strong>Error</strong> in one or more of the fields.
         </div>
     </c:if>
 
-    <form:form modelAttribute="rule" action="/app/rules/${rule.type}/new" cssClass="form-horizontal">
+    <form:form modelAttribute="rule" action="/app/rules/${rule.type}/${rule.id}" cssClass="form-horizontal">
 
         <form:hidden path="id" />
 
