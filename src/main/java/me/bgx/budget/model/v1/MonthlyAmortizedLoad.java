@@ -3,6 +3,8 @@ package me.bgx.budget.model.v1;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
@@ -21,6 +23,7 @@ public class MonthlyAmortizedLoad extends Rule {
 
     @Setter
     @Getter
+    @NotNull
     @RuleField(label = "Number of periods", order = 10)
     private int periods;
 
@@ -46,17 +49,23 @@ public class MonthlyAmortizedLoad extends Rule {
 
     @Setter
     @Getter
+    @NotNull
     @RuleField(label = "Periodicity", order = 15)
     private Period period;
 
     @Override
     public Collection<Amount> generate() {
-
         Preconditions.checkState(0 <= periods && periods <= 10000);
         Preconditions.checkState(0.0 <= rate && rate <= 10000.0);
         // https://en.wikipedia.org/wiki/Mortgage_calculator
         // rP / (1 - (1 + r)^-N)
-        double fixedPayment = -(rate * owned) / (1 - Math.pow(1 + rate, -periods));
+        final double fixedPayment;
+        if (rate == 0.0) {
+            fixedPayment = -owned / periods;
+        } else {
+            fixedPayment = -(rate * owned) / (1.0 - Math.pow(1.0 + rate, -periods));
+        }
+
         LocalDate date = from;
 
         Collection<Amount> amounts = new ArrayList<>();

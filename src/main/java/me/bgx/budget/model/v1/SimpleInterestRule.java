@@ -3,6 +3,9 @@ package me.bgx.budget.model.v1;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 
@@ -25,6 +28,7 @@ public class SimpleInterestRule extends Rule {
 
     @Setter
     @Getter
+    @NotNull
     @RuleField(label = "Start", order = 11)
     private LocalDate from;
 
@@ -45,9 +49,9 @@ public class SimpleInterestRule extends Rule {
 
     @Setter
     @Getter
+    @NotNull
     @RuleField(label = "Periodicity", order = 15)
     private Period period;
-
 
     @Override
     public Collection<Amount> generate() {

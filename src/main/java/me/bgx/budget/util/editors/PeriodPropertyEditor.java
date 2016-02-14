@@ -1,4 +1,4 @@
-package me.bgx.budget.util;
+package me.bgx.budget.util.editors;
 
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
@@ -15,7 +15,7 @@ import org.joda.time.format.PeriodFormatterBuilder;
 import org.joda.time.format.PeriodParser;
 import org.joda.time.format.PeriodPrinter;
 
-public class PeriodEditor extends PropertyEditorSupport {
+public class PeriodPropertyEditor extends PropertyEditorSupport {
     PeriodFormatter PeriodFormatter = new PeriodFormatterBuilder()
             .append(new CustomPeriodPrinter(), new CustomPeriodParser())
             .toFormatter();
@@ -42,7 +42,7 @@ public class PeriodEditor extends PropertyEditorSupport {
     private static final class CustomPeriodPrinter implements PeriodPrinter {
 
         String toString(ReadablePeriod period) {
-            return PeriodEditor.toString(period);
+            return PeriodPropertyEditor.toString(period);
         }
 
         @Override
@@ -106,7 +106,7 @@ public class PeriodEditor extends PropertyEditorSupport {
     @Override
     public String getAsText() {
         if (getValue() == null) {
-            return "";
+            return null;
         }
         return PeriodFormatter.print((Period) getValue());
     }
@@ -115,6 +115,10 @@ public class PeriodEditor extends PropertyEditorSupport {
     public void setAsText(String text) throws IllegalArgumentException {
         if (text == null) {
             text = "";
+        }
+        text = text.trim();
+        if (text.isEmpty()) {
+            throw new IllegalArgumentException("Invalid period");
         }
         setValue(PeriodFormatter.parsePeriod(text));
     }

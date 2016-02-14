@@ -2,6 +2,8 @@ package me.bgx.budget.model.v1;
 
 import java.util.Collection;
 
+import javax.validation.constraints.NotNull;
+
 import org.joda.time.LocalDate;
 
 import com.google.common.collect.ImmutableList;
@@ -17,6 +19,7 @@ import me.bgx.budget.util.RuleField;
 public class SingleAmountRule extends Rule {
     @Setter
     @Getter
+    @NotNull
     @RuleField(label = "When", order = 10)
     private LocalDate when;
 

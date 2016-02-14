@@ -17,24 +17,21 @@
             Saved successfully
         </div>
     </c:if>
-    <c:forEach var="error" items="${errors}">
-
+    <c:if test="${hasErrors}">
         <div class="alert alert-danger" role="alert">
                 <%--<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>--%>
                 <%--<strong>Warning</strong>--%>
                 <%--Couldn't find the rule. Creating a new one.--%>
-            <strong>Error</strong>
-            in field '${error.field}', invalid value '${error.rejectedValue}'. ${error}
+            <strong>Error</strong> in one or more of the fields.
         </div>
-
-    </c:forEach>
+    </c:if>
 
     <form:form modelAttribute="rule" action="/app/rules/${rule.type}/new" cssClass="form-horizontal">
 
         <form:hidden path="id" />
 
         <c:forEach var="fieldDescription" items="${fields}">
-            <deco:input type="${fieldDescription.type}" path="${fieldDescription.path}" label="${fieldDescription.label}" rule="${rule}" />
+            <deco:input type="${fieldDescription.type}" path="${fieldDescription.path}" label="${fieldDescription.label}" rule="${rule}" showError="${fieldsErrors[fieldDescription.path]}"/>
         </c:forEach>
 
         <button type="submit" class="btn btn-primary">Save</button>

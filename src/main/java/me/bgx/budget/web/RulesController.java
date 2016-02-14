@@ -4,6 +4,8 @@ package me.bgx.budget.web;
 import java.beans.PropertyEditorSupport;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
@@ -13,6 +15,7 @@ import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -26,8 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 import me.bgx.budget.autowired.RulesStorageService;
 import me.bgx.budget.model.v1.Rule;
 import me.bgx.budget.util.EditorDescription;
-import me.bgx.budget.util.LocalDateEditor;
-import me.bgx.budget.util.PeriodEditor;
+import me.bgx.budget.util.editors.LocalDatePropertyEditor;
+import me.bgx.budget.util.editors.PercentagePropertyEditor;
+import me.bgx.budget.util.editors.PeriodPropertyEditor;
 
 @Slf4j
 @Controller
@@ -39,48 +43,12 @@ public class RulesController {
 
     private static final Pattern RULES_PATTERN = Pattern.compile("/app/rules/([^/]*)/.*");
 
-    private static final PropertyEditorSupport PERCENTAGE_EDITOR = new PropertyEditorSupport() {
-        @Override
-        public String getAsText() {
-            Double value = (Double) getValue();
-            if (getValue() == null) {
-                return "0%";
-            }
-            String v = String.format("%f", value * 100);
-
-            if (v.endsWith(".")) {
-                v = v.substring(0, v.length() - 1);
-            }
-            return  v + "%";
-        }
-
-        @Override
-        public void setAsText(String text) throws IllegalArgumentException {
-            if (text == null) {
-                setValue(0.0);
-                return;
-            }
-            text = text.trim();
-            try {
-                if (text.endsWith("%")) {
-                    text = text.substring(0, text.length() - 1);
-                    setValue(Double.parseDouble(text) / 100);
-                } else if (text.startsWith("%")) {
-                    text = text.substring(1, text.length());
-                    setValue(Double.parseDouble(text) / 100);
-                } else {
-                    setValue(Double.parseDouble(text));
-                }
-            } catch (NumberFormatException nfe) {
-                throw new RuntimeException("Invalid percentage: " + text, nfe);
-            }
-        }
-    };
+    private static final PropertyEditorSupport PERCENTAGE_EDITOR = new PercentagePropertyEditor();
 
     @InitBinder
     public void initBinder(WebDataBinder binder, HttpServletRequest request) {
-        binder.registerCustomEditor(LocalDate.class, new LocalDateEditor());
-        binder.registerCustomEditor(Period.class, new PeriodEditor());
+        binder.registerCustomEditor(LocalDate.class, new LocalDatePropertyEditor());
+        binder.registerCustomEditor(Period.class, new PeriodPropertyEditor());
 
         Matcher m = RULES_PATTERN.matcher(request.getRequestURI());
         if (m.matches()) {
@@ -102,7 +70,8 @@ public class RulesController {
 
     @RequestMapping(method = RequestMethod.GET)
     public ModelAndView list() {
-        return new ModelAndView("rules/list").addObject("rules", rulesStorageService.list());
+        return new ModelAndView("rules/list")
+                .addObject("rules", rulesStorageService.list());
     }
 
     @RequestMapping(value = "/{type}/{id}", method = RequestMethod.GET)
@@ -133,10 +102,21 @@ public class RulesController {
             @PathVariable String reqId,
             @ModelAttribute("rule") Rule rule,
             BindingResult bindingResult,
-            HttpServletRequest req)
-    {
-        rulesStorageService.save(rule);
-        return new ModelAndView("redirect:/app/rules/" + rule.getType() + "/" + rule.getId());
+            HttpServletRequest req) {
+        if (bindingResult.hasErrors()) {
+            Map<String, Boolean> fieldsWithErrors = new HashMap<>();
+            for (FieldError fe : bindingResult.getFieldErrors()) {
+                fieldsWithErrors.put(fe.getField(), true);
+            }
+            return new ModelAndView("rules/generic/edit")
+                    .addObject("rule", rule)
+                    .addObject("hasErrors", bindingResult.hasErrors())
+                    .addObject("fieldsErrors", fieldsWithErrors)
+                    .addObject("fields", Rule.EDITORS.get(type).getFields());
+        } else {
+            rulesStorageService.save(rule);
+            return new ModelAndView("redirect:/app/rules/?saved=" + rule.getId());
+        }
     }
 
     @RequestMapping(value = "/new", method = RequestMethod.GET)
@@ -164,9 +144,7 @@ public class RulesController {
             String type = m.group(1);
             return Rule.newInstanceFromType(type);
         }
-
         return null;
-
     }
 
 

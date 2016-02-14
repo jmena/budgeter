@@ -2,6 +2,8 @@ package me.bgx.budget.model.v1;
 
 import java.util.Collection;
 
+import javax.validation.constraints.NotNull;
+
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 
@@ -20,16 +22,18 @@ public class PeriodicRule extends Rule {
     @Setter
     @Getter
     @RuleField(label = "From", order = 10)
+    @NotNull
     private LocalDate from;
 
     @Setter
     @Getter
-    @RuleField(label = "To", order = 11)
-    private LocalDate to;
+    @RuleField(label = "Number of periods", order = 11)
+    private int periods;
 
     @Setter
     @Getter
     @RuleField(label = "Period", order = 12)
+    @NotNull
     private Period period;
 
     @Setter
@@ -40,8 +44,8 @@ public class PeriodicRule extends Rule {
     @Override
     public Collection<Amount> generate() {
         ImmutableList.Builder<Amount> amounts = new ImmutableList.Builder<>();
-        int i=0;
-        for (LocalDate date = from; date.compareTo(to) <= 0; date = date.plus(period)) {
+        LocalDate date = from;
+        for (int i=0; i < periods; i++) {
             if (i > 10000) {
                 throw new RuntimeException("Too many periods");
             }
@@ -52,7 +56,7 @@ public class PeriodicRule extends Rule {
                     .description(getName())
                     .build();
             amounts.add(singleAmount);
-            i++;
+            date = date.plus(period);
         }
         return amounts.build();
     }

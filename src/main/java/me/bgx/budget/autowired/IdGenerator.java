@@ -1,5 +1,6 @@
 package me.bgx.budget.autowired;
 
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -10,7 +11,7 @@ import lombok.AllArgsConstructor;
 @Service
 public class IdGenerator {
     private static final int LENGTH = 22;
-    private static final Random random = new SecureRandom();
+    private static final Random rng;
     private static final char CHARS[];
     private static final Range RANGES[];
 
@@ -20,12 +21,19 @@ public class IdGenerator {
     }
 
     static {
-        RANGES = new Range[] {
+        RANGES = new Range[]{
                 new Range('A', 'Z'),
                 new Range('a', 'z'),
                 new Range('0', '9'),
         };
         CHARS = generateChars(RANGES);
+        Random r;
+        try {
+            r = SecureRandom.getInstance("SHA1PRNG");
+        } catch (NoSuchAlgorithmException e) {
+            r = new Random();
+        }
+        rng = r;
     }
 
     private static char[] generateChars(Range ranges[]) {
@@ -44,12 +52,12 @@ public class IdGenerator {
     }
 
     public String newId() {
-        StringBuilder sb = new StringBuilder(LENGTH);
+        char newId[] = new char[LENGTH];
         for (int i = 0; i < LENGTH; i++) {
-            int idx = random.nextInt(CHARS.length);
-            sb.append(CHARS[idx]);
+            int idx = rng.nextInt(CHARS.length);
+            newId[i] = CHARS[idx];
         }
-        return sb.toString();
+        return String.valueOf(newId);
     }
 
     public boolean isValidId(String id) {
