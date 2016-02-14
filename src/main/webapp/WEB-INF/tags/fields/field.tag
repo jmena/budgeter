@@ -1,7 +1,7 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib tagdir="/WEB-INF/tags/fields" prefix="fields" %>
-<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ attribute name="fd" type="me.bgx.budget.util.FieldDescription" %>
 
 <spring:bind path="${fd.path}">
@@ -15,8 +15,13 @@
         <c:when test="${fd.type == 'boolean'}">
             <fields:boolean fd="${fd}" />
         </c:when>
-        <c:when test="${fd.type == 'String' or fd.type == 'int' or fd.type == 'percentage' or fd.type == 'double'}">
-            <fields:simpletext fd="${fd}" />
+        <c:when test="${fd.type == 'String' or
+                        fd.type == 'int' or
+                        fd.type == 'percentage' or
+                        fd.type == 'double' or
+                        fd.type == 'Period'
+                        }">
+            <fields:simpletext fd="${fd}"/>
         </c:when>
         <c:when test="${fd.type == 'textarea'}">
             <fields:textarea fd="${fd}" />

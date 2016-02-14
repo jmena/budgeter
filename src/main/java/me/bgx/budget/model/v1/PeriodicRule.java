@@ -21,24 +21,24 @@ public class PeriodicRule extends Rule {
 
     @Setter
     @Getter
-    @RuleField(label = "From", order = 10)
+    @RuleField(label = "Start", order = 11)
     @NotNull
     private LocalDate from;
 
     @Setter
     @Getter
-    @RuleField(label = "Number of periods", order = 11)
+    @RuleField(label = "Number of periods", order = 10)
     private int periods;
 
     @Setter
     @Getter
-    @RuleField(label = "Period", order = 12)
+    @RuleField(label = "Periodicity", order = 13)
     @NotNull
     private Period period;
 
     @Setter
     @Getter
-    @RuleField(label = "Amount", order = 13)
+    @RuleField(label = "Amount", order = 12)
     private double amount;
 
     @Override

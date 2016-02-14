@@ -34,23 +34,23 @@ public class SimpleInterestRule extends Rule {
 
     @Setter
     @Getter
-    @RuleField(label = "Owned", order = 12)
+    @RuleField(label = "Amount", order = 12)
     private double owned;
 
     @Setter
     @Getter
-    @RuleField(label = "Rate", type = "percentage", order = 13)
+    @RuleField(label = "Rate", type = "percentage", order = 14)
     private double rate;
 
     @Setter
     @Getter
-    @RuleField(label = "Detailed data", additionalInformation = "Split capital contribution and interest", order = 14)
+    @RuleField(label = "Detailed data", additionalInformation = "Split capital contribution and interest", order = 15)
     private boolean detailed;
 
     @Setter
     @Getter
     @NotNull
-    @RuleField(label = "Periodicity", order = 15)
+    @RuleField(label = "Periodicity", order = 13)
     private Period period;
 
     @Override
