@@ -26,10 +26,10 @@ public class RulesStorageService {
     @Setter
     IdGenerator idGenerator;
 
-    public Rule get(String id) {
-        String userId = getUserId();
+    public Rule load(String id) {
+        String userId = auth.getUserId();;
         Preconditions.checkNotNull(userId);
-        if (Strings.isNullOrEmpty(userId) || Strings.isNullOrEmpty(id)) {
+        if (Strings.isNullOrEmpty(userId) || !idGenerator.isValidId(id)) {
             return null;
         }
         Rule rule = ofy().load().type(Rule.class).id(id).now();
@@ -40,34 +40,43 @@ public class RulesStorageService {
     }
 
     public void save(Rule rule) {
-        String userId = getUserId();
+        String userId = auth.getUserId();;
         Preconditions.checkNotNull(rule);
         Preconditions.checkNotNull(userId);
-        if (Strings.isNullOrEmpty(rule.getId()) || "new".equals(rule.getId())) {
+
+        // if it's a new rule, create an id
+        if (!idGenerator.isValidId(rule.getId())) {
             rule.setId(idGenerator.newId());
         }
-        rule.setUserId(userId);
+
+        // userId not set, use default
+        if (rule.getUserId() == null) {
+            rule.setUserId(userId);
+        }
+
+        // if we're updating a rule, check if the userId matches between the stored rule and the new rule
+        Rule storedRule = load(rule.getId());
+        if (storedRule != null && !userId.equals(storedRule.getUserId())) {
+            return;
+        }
+
         ofy().save().entity(rule);
     }
 
     public void delete(String id) {
-        String userId = getUserId();
+        String userId = auth.getUserId();;
         Preconditions.checkNotNull(userId);
-        Rule rule = get(id);
-        if (rule == null && !userId.equals(rule.getUserId())) {
+        Rule rule = load(id);
+        if (rule == null || !userId.equals(rule.getUserId())) {
             return;
         }
         ofy().delete().type(Rule.class).id(id).now();
     }
 
     public Collection<? extends Rule> list() {
-        String userId = getUserId();
+        String userId = auth.getUserId();;
         Preconditions.checkNotNull(userId);
         List<Rule> rules = ofy().load().type(Rule.class).filter("userId", userId).list();
         return rules;
-    }
-
-    private String getUserId() {
-        return auth.getUserId();
     }
 }

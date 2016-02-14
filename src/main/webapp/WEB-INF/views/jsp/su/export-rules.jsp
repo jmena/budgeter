@@ -1,6 +1,6 @@
-<%@ page import="com.google.gson.Gson" %>
 <deco:container>
     <div class="row">
-        <textarea rows="40" cols="80">${rulesJson}</textarea>
+        <p>All rules in the system</p>
+        <textarea class="fixed-font-textarea" rows="20" cols="80">${rulesJson}</textarea>
     </div>
 </deco:container>

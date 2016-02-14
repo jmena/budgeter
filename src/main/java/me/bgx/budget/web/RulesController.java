@@ -22,9 +22,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.google.appengine.api.users.User;
-import com.google.common.base.Strings;
-
 import lombok.extern.slf4j.Slf4j;
 import me.bgx.budget.autowired.RulesStorageService;
 import me.bgx.budget.model.v1.Rule;
@@ -110,16 +107,17 @@ public class RulesController {
 
     @RequestMapping(value = "/{type}/{id}", method = RequestMethod.GET)
     public ModelAndView newOrEditRule(@PathVariable String type, @PathVariable String id) {
-        Rule rule = null;
-        if (id != null && !"new".equals(id) && !Strings.isNullOrEmpty(id)) {
-            rule = rulesStorageService.get(id);
-        }
-        if (rule == null) {
+
+        final Rule rule;
+        if ("new".equals(id)) {
             // rule doesn't exist, create a new one
             rule = Rule.newInstanceFromType(type);
+        } else {
+            rule = rulesStorageService.load(id);
         }
+
         if (rule == null) {
-            // couldn't find any rule
+            // rule doesn't exists
             return new ModelAndView("redirect:/app/rules/new");
         }
 

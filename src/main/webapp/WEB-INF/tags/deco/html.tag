@@ -34,8 +34,8 @@
 
                 <li><a href="/app/rules/">Rules</a></li>
                 <li><a href="/app/simulations/">Simulations</a></li>
-                <c:if test="${requestScope.isAdmin}">
-                    <li><a href="/app/admin/">SU</a></li>
+                <c:if test="${pageContext.request.user.admin}">
+                    <li><a href="/app/su/">SU</a></li>
                 </c:if>
                 <li>
                     <a>${pageContext.request.user.email}</a>
