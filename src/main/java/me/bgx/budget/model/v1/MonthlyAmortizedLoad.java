@@ -54,7 +54,7 @@ public class MonthlyAmortizedLoad extends Rule {
     private Period period;
 
     @Override
-    public Collection<Amount> generate() {
+    public Collection<Amount> generate(LocalDate until) {
         Preconditions.checkState(0 <= periods && periods <= 10000);
         Preconditions.checkState(0.0 <= rate && rate <= 10000.0);
         // https://en.wikipedia.org/wiki/Mortgage_calculator
@@ -70,13 +70,17 @@ public class MonthlyAmortizedLoad extends Rule {
 
         Collection<Amount> amounts = new ArrayList<>();
         double balance = -owned;
-        for (int i = 0; i < periods; i++) {
+        int max = (periods > 0) ? Math.min(periods, N_PERIODS_LIMIT) : N_PERIODS_LIMIT;
+        for (int i = 0; i < max; i++) {
+            if (loopOutOfLimits(date, until)) {
+                break;
+            }
             double interest = balance * rate;
             double capitalContribution = fixedPayment - interest;
             generatePaymentInterestAmount(detailed, date, capitalContribution, interest, amounts);
             date = date.plus(period);
             balance = balance + interest - fixedPayment;
         }
-        return Collections.unmodifiableCollection(amounts);
+        return amounts;
     }
 }

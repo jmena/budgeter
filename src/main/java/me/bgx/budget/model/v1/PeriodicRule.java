@@ -1,13 +1,12 @@
 package me.bgx.budget.model.v1;
 
+import java.util.ArrayList;
 import java.util.Collection;
-
 import javax.validation.constraints.NotNull;
 
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 
-import com.google.common.collect.ImmutableList;
 import com.googlecode.objectify.annotation.Subclass;
 
 import lombok.Getter;
@@ -15,7 +14,7 @@ import lombok.Setter;
 import me.bgx.budget.util.IsRule;
 import me.bgx.budget.util.RuleField;
 
-@IsRule(type="periodic-amount", label="Periodic amount")
+@IsRule(type = "periodic-amount", label = "Periodic amount")
 @Subclass
 public class PeriodicRule extends Rule {
 
@@ -27,7 +26,7 @@ public class PeriodicRule extends Rule {
 
     @Setter
     @Getter
-    @RuleField(label = "Number of periods", order = 10)
+    @RuleField(label = "Number of periods", type = "nperiods", order = 10)
     private int periods;
 
     @Setter
@@ -42,12 +41,13 @@ public class PeriodicRule extends Rule {
     private double amount;
 
     @Override
-    public Collection<Amount> generate() {
-        ImmutableList.Builder<Amount> amounts = new ImmutableList.Builder<>();
+    public Collection<Amount> generate(LocalDate until) {
+        Collection<Amount> amounts = new ArrayList<>();
         LocalDate date = from;
-        for (int i=0; i < periods; i++) {
-            if (i > 10000) {
-                throw new RuntimeException("Too many periods");
+        int max = (periods > 0) ? Math.min(periods, N_PERIODS_LIMIT) : N_PERIODS_LIMIT;
+        for (int i = 0; i < max; i--) {
+            if (loopOutOfLimits(date, until)) {
+                break;
             }
             Amount singleAmount = Amount.builder()
                     .date(date)
@@ -58,6 +58,8 @@ public class PeriodicRule extends Rule {
             amounts.add(singleAmount);
             date = date.plus(period);
         }
-        return amounts.build();
+        return amounts;
     }
+
+
 }

@@ -35,6 +35,8 @@ public abstract class Rule {
             .add(SingleAmountRule.class)
             .build();
 
+    protected static final int N_PERIODS_LIMIT = 10000;
+
     /**
      * All editors
      */
@@ -158,7 +160,7 @@ public abstract class Rule {
         return getClass().getAnnotation(IsRule.class).label();
     }
 
-    public abstract Collection<Amount> generate();
+    public abstract Collection<Amount> generate(LocalDate until);
 
     public static Rule newInstanceFromType(String ruleType) {
         try {
@@ -193,5 +195,9 @@ public abstract class Rule {
                     .amount(capitalContribution + interest)
                     .build());
         }
+    }
+
+    protected boolean loopOutOfLimits(LocalDate date, LocalDate until) {
+        return (until != null && date.compareTo(until) > 0);
     }
 }

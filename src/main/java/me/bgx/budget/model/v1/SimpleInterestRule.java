@@ -2,14 +2,11 @@ package me.bgx.budget.model.v1;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 
-import com.google.common.collect.ImmutableList;
 import com.googlecode.objectify.annotation.Subclass;
 
 import lombok.Getter;
@@ -54,14 +51,18 @@ public class SimpleInterestRule extends Rule {
     private Period period;
 
     @Override
-    public Collection<Amount> generate() {
+    public Collection<Amount> generate(LocalDate until) {
         Collection<Amount> amounts = new ArrayList<>(periods);
 
         double payment = -owned / periods;
         double balance = -owned;
 
         LocalDate date = from;
-        for (int i = 0; i < periods; i++) {
+        int max = (periods > 0) ? Math.min(periods, N_PERIODS_LIMIT) : N_PERIODS_LIMIT;
+        for (int i = 0; i < max; i++) {
+            if (loopOutOfLimits(date, until)) {
+                break;
+            }
             double interest = balance * rate;
             generatePaymentInterestAmount(detailed, date, payment, interest, amounts);
             date = date.plus(period);

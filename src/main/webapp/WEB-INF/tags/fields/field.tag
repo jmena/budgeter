@@ -19,6 +19,7 @@
                         fd.type == 'int' or
                         fd.type == 'percentage' or
                         fd.type == 'double' or
+                        fd.type == 'nperiods' or
                         fd.type == 'Period'
                         }">
             <fields:simpletext fd="${fd}"/>

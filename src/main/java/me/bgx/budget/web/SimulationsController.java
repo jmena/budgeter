@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.LocalDate;
@@ -18,13 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.google.appengine.api.users.User;
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bgx.budget.autowired.RulesStorageService;
 import me.bgx.budget.model.v1.Amount;
 import me.bgx.budget.model.v1.Rule;
-import me.bgx.budget.autowired.RulesStorageService;
 
 @Slf4j
 @Controller
@@ -75,7 +72,8 @@ public class SimulationsController {
     @RequestMapping(method = RequestMethod.GET)
     public ModelAndView list(HttpServletRequest req) {
         // Collection<Amount> amounts = allAmounts().stream().filter(between(from, to)).collect(Collectors.toList());
-        Collection<Amount> amounts = allAmounts();
+        LocalDate until = new LocalDate().plusYears(4);
+        Collection<Amount> amounts = allAmounts(until);
 
         YearMonth minMonth = MAX_DATE;
         YearMonth maxMonth = MIN_DATE;
@@ -176,10 +174,10 @@ public class SimulationsController {
         return strs;
     }
 
-    private Collection<Amount> allAmounts() {
+    private Collection<Amount> allAmounts(LocalDate until) {
         Collection<Amount> amounts = new ArrayList<>();
         for (Rule rule : rulesStorageService.list()) {
-            amounts.addAll(rule.generate());
+            amounts.addAll(rule.generate(until));
         }
         return amounts;
     }

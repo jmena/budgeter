@@ -4,7 +4,6 @@ package me.bgx.budget.web;
 import java.beans.PropertyEditorSupport;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,7 +14,6 @@ import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -24,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.google.common.collect.ImmutableMap;
@@ -36,6 +33,7 @@ import me.bgx.budget.autowired.RulesStorageService;
 import me.bgx.budget.model.v1.Rule;
 import me.bgx.budget.util.EditorDescription;
 import me.bgx.budget.util.editors.LocalDatePropertyEditor;
+import me.bgx.budget.util.editors.NumberOfPeriodsEditor;
 import me.bgx.budget.util.editors.PercentagePropertyEditor;
 import me.bgx.budget.util.editors.PeriodPropertyEditor;
 
@@ -50,6 +48,7 @@ public class RulesController {
     private static final Pattern RULES_PATTERN = Pattern.compile("/app/rules/([^/]*)/.*");
 
     private static final PropertyEditorSupport PERCENTAGE_EDITOR = new PercentagePropertyEditor();
+    private static final PropertyEditorSupport NUMBER_OF_PERIODS_EDITOR = new NumberOfPeriodsEditor();
 
     @InitBinder
     public void initBinder(WebDataBinder binder, HttpServletRequest request) {
@@ -64,14 +63,18 @@ public class RulesController {
                 throw new RuntimeException("Editor doesn't exist: " + type);
             }
 
-            Collection<String> percentageProps = editorDescription.getFieldsByType().get("percentage");
-            if (percentageProps == null) {
-                percentageProps = Collections.emptyList();
-            }
-            for (String property : percentageProps) {
+            Map<String, Collection<String>> fieldsByType = editorDescription.getFieldsByType();
+            for (String property : def(fieldsByType.get("percentage"))) {
                 binder.registerCustomEditor(double.class, property, PERCENTAGE_EDITOR);
             }
+            for (String property : def(fieldsByType.get("nperiods"))) {
+                binder.registerCustomEditor(int.class, property, NUMBER_OF_PERIODS_EDITOR);
+            }
         }
+    }
+
+    private <T> Collection<T> def(Collection<T> lst) {
+        return (lst != null) ? lst : Collections.<T>emptyList();
     }
 
     @RequestMapping(method = RequestMethod.GET)
