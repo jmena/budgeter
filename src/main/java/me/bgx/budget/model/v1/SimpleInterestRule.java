@@ -44,7 +44,7 @@ public class SimpleInterestRule extends Rule {
 
     @Setter
     @Getter
-    @RuleField(label = "Generate separated interest data", order = 14)
+    @RuleField(label = "Detailed data", additionalInformation = "Split capital contribution and interest", order = 14)
     private boolean detailed;
 
     @Setter

@@ -80,7 +80,7 @@ public abstract class Rule {
         });
     }
 
-    // use getAllFields
+    // don't use this method. use getAllFields. Get all fields of the class clazz.
     private static void getAllFieldsAux(Class<?> clazz, List<FieldDescription> fieldDescriptions, Map<String, Collection<String>> fieldsByType) {
         if (clazz == null) {
             return;
@@ -109,6 +109,7 @@ public abstract class Rule {
                     .path(field.getName())
                     .type(fieldType)
                     .order(ruleField.order())
+                    .additionalInformation(ruleField.additionalInformation())
                     .build();
             fieldDescriptions.add(fieldDescription);
         }

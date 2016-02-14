@@ -31,7 +31,7 @@
         <form:hidden path="id" />
 
         <c:forEach var="fieldDescription" items="${fields}">
-            <deco:input type="${fieldDescription.type}" path="${fieldDescription.path}" label="${fieldDescription.label}" rule="${rule}" showError="${fieldsErrors[fieldDescription.path]}"/>
+            <fields:field fd="${fieldDescription}" />
         </c:forEach>
 
         <button type="submit" class="btn btn-primary">Save</button>

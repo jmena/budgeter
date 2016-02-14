@@ -23,7 +23,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import lombok.extern.slf4j.Slf4j;
 import me.bgx.budget.autowired.RulesStorageService;
@@ -104,19 +110,26 @@ public class RulesController {
             BindingResult bindingResult,
             HttpServletRequest req) {
         if (bindingResult.hasErrors()) {
-            Map<String, Boolean> fieldsWithErrors = new HashMap<>();
-            for (FieldError fe : bindingResult.getFieldErrors()) {
-                fieldsWithErrors.put(fe.getField(), true);
-            }
             return new ModelAndView("rules/generic/edit")
                     .addObject("rule", rule)
                     .addObject("hasErrors", bindingResult.hasErrors())
-                    .addObject("fieldsErrors", fieldsWithErrors)
                     .addObject("fields", Rule.EDITORS.get(type).getFields());
         } else {
             rulesStorageService.save(rule);
             return new ModelAndView("redirect:/app/rules/?saved=" + rule.getId());
         }
+    }
+
+    @RequestMapping(value = "/{ruleId}", method = RequestMethod.DELETE, produces = "application/json")
+    @ResponseBody
+    public String delete(@PathVariable String ruleId) {
+        rulesStorageService.delete(ruleId);
+
+        Map<String, String> map = new ImmutableMap.Builder<String, String>()
+                .put("response", "ok")
+                .build();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(map);
     }
 
     @RequestMapping(value = "/new", method = RequestMethod.GET)

@@ -10,4 +10,5 @@ public class FieldDescription {
     String path;
     String type;
     int order;
+    String additionalInformation;
 }

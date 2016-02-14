@@ -8,7 +8,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface RuleField {
-    String label();
+    String label() default "";
     String type() default "";
     int order() default 0;
+    String additionalInformation() default "";
 }
