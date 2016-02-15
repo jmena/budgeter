@@ -17,7 +17,15 @@
             <tr>
                 <td>
                     <c:set var="rule" value="${rulesByDescription[description]}" />
-                    <a href="/app/rules/${rule.type}/${rule.id}">${description} <span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                    <a href="/app/rules/${rule.type}/${rule.id}">${description}</a>
+
+                    <c:forEach var="label" items="${rule.tags}">
+                        <span class="label label-info">${label}</span>
+                    </c:forEach>
+
+                    <a href="/app/rules/${rule.type}/${rule.id}">
+                        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                    </a>
                 </td>
                 <c:forEach var="month" items="${months}">
                     <td class="text-right">
@@ -54,4 +62,21 @@
         </tfoot>
         </tbody>
     </table>
+
+    <div class="row">
+        <h3>Tags</h3>
+
+        <h4>Include</h4>
+        <span class="label label-info">hij (1)</span>
+        <span class="label label-info">req (3)</span>
+
+        <h4>Exclude</h4>
+        <span class="label label-info">zef (2)</span>
+        <span class="label label-info">ksd (1)</span>
+        <span class="label label-info">ksd (7)</span>
+
+        <h4>Extra</h4>
+        <span class="label label-info">ksd (6)</span>
+
+    </div>
 </deco:container>

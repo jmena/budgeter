@@ -1,4 +1,4 @@
-package me.bgx.budget.autowired;
+package me.bgx.budget.model.services;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -14,42 +14,6 @@ public class IdGenerator {
     private static final Random rng;
     private static final char CHARS[];
     private static final Range RANGES[];
-
-    @AllArgsConstructor
-    private static class Range {
-        char from, to;
-    }
-
-    static {
-        RANGES = new Range[]{
-                new Range('A', 'Z'),
-                new Range('a', 'z'),
-                new Range('0', '9'),
-        };
-        CHARS = generateChars(RANGES);
-        Random r;
-        try {
-            r = SecureRandom.getInstance("SHA1PRNG");
-        } catch (NoSuchAlgorithmException e) {
-            r = new Random();
-        }
-        rng = r;
-    }
-
-    private static char[] generateChars(Range ranges[]) {
-        int size = 0;
-        for (Range range : ranges) {
-            size += (range.to - range.from + 1);
-        }
-        char chars[] = new char[size];
-        size = 0;
-        for (Range range : ranges) {
-            for (char ch = range.from; ch <= range.to; ch++) {
-                chars[size++] = ch;
-            }
-        }
-        return chars;
-    }
 
     public String newId() {
         char newId[] = new char[LENGTH];
@@ -84,4 +48,41 @@ public class IdGenerator {
         }
         return false;
     }
+
+    static {
+        RANGES = new Range[]{
+                new Range('A', 'Z'),
+                new Range('a', 'z'),
+                new Range('0', '9'),
+        };
+        CHARS = generateChars(RANGES);
+        Random r;
+        try {
+            r = SecureRandom.getInstance("SHA1PRNG");
+        } catch (NoSuchAlgorithmException e) {
+            r = new Random();
+        }
+        rng = r;
+    }
+
+    private static char[] generateChars(Range ranges[]) {
+        int size = 0;
+        for (Range range : ranges) {
+            size += (range.to - range.from + 1);
+        }
+        char chars[] = new char[size];
+        size = 0;
+        for (Range range : ranges) {
+            for (char ch = range.from; ch <= range.to; ch++) {
+                chars[size++] = ch;
+            }
+        }
+        return chars;
+    }
+
+    @AllArgsConstructor
+    private static class Range {
+        char from, to;
+    }
+
 }

@@ -3,7 +3,7 @@ package me.bgx.budget.util;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-import me.bgx.budget.model.v1.Rule;
+import me.bgx.budget.model.data.rules.Rule;
 
 public class RuleValidator implements Validator {
     @Override

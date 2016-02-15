@@ -4,7 +4,7 @@
     </div>
 
 
-    <form action="/app/rules/" method="POST">
+    <form action="/app/projects/${projectId}/rules/new" method="POST">
 
 
         <c:forEach var="e" items="${editors}" varStatus="vs">

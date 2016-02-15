@@ -6,7 +6,7 @@ import java.util.Map;
 
 import lombok.Builder;
 import lombok.Getter;
-import me.bgx.budget.model.v1.Rule;
+import me.bgx.budget.model.data.rules.Rule;
 
 @Builder
 public class EditorDescription {

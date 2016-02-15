@@ -1,8 +1,8 @@
-package me.bgx.budget.web;
+package me.bgx.budget.controllers;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,63 +17,37 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bgx.budget.autowired.RulesStorageService;
-import me.bgx.budget.model.v1.Amount;
-import me.bgx.budget.model.v1.Rule;
+import me.bgx.budget.model.data.rules.Rule;
+import me.bgx.budget.model.generators.Amount;
+import me.bgx.budget.model.generators.Generator;
+import me.bgx.budget.model.services.RulesMetadataService;
+import me.bgx.budget.model.services.RulesStorageService;
+import me.bgx.budget.util.MapWithDefaultValue;
 
 @Slf4j
 @Controller
 @RequestMapping(value = "/app/simulations")
 public class SimulationsController {
 
-    private static final Double ZERO = 0.0;
     private static final YearMonth MIN_DATE = new YearMonth(1, 1);
     private static final YearMonth MAX_DATE = new YearMonth(3000, 1);
-    private static final DefaultValueProvider<Double> ZERO_DEFAULT = new DefaultValueProvider<Double>() {
-        @Override
-        public Double get() {
-            return ZERO;
-        }
-    };
-
-    private static final DefaultValueProvider<Map<String, Double>> DEFAULT_MAP = new DefaultValueProvider<Map<String, Double>>() {
-        @Override
-        public Map<String, Double> get() {
-            return new MapWithDefault<>(ZERO_DEFAULT);
-        }
-    };
-
-    private interface DefaultValueProvider<V> {
-        V get();
-    }
-
-    @AllArgsConstructor
-    private static class MapWithDefault<K, V> extends HashMap<K, V> {
-        DefaultValueProvider<V> defaultValueProvider;
-
-        V getDefaultValue() {
-            return defaultValueProvider.get();
-        }
-
-        @Override
-        public V get(Object k) {
-            if (!containsKey(k)) {
-                put((K) k, getDefaultValue());
-            }
-            return super.get(k);
-        }
-    }
 
     @Autowired
     RulesStorageService rulesStorageService;
 
+    @Autowired
+    RulesMetadataService rulesMetadataService;
+
     @RequestMapping(method = RequestMethod.GET)
     public ModelAndView list(HttpServletRequest req) {
-        // Collection<Amount> amounts = allAmounts().stream().filter(between(from, to)).collect(Collectors.toList());
+
+        Collection<Rule> rules = null; // TODO: fix this rulesStorageService.list();
+        List<String> tags = getTags(rules);
+
+        // TODO: this must be read from the user
         LocalDate until = new LocalDate().plusYears(4);
-        Collection<Amount> amounts = allAmounts(until);
+        Collection<Amount> amounts = allAmounts(rules, until);
 
         YearMonth minMonth = MAX_DATE;
         YearMonth maxMonth = MIN_DATE;
@@ -87,7 +61,7 @@ public class SimulationsController {
         }
 
         // generate calendar
-        Map<YearMonth, Map<String, Double>> calendar = new MapWithDefault<>(DEFAULT_MAP);
+        Map<YearMonth, Map<String, Double>> calendar = new MapWithDefaultValue<>(MapWithDefaultValue.MAP_ZERO_DOUBLE_VALUE_PROVIDER);
         Map<String, Rule> rulesByDescription = new LinkedHashMap<>();
         getCalendar(amounts, calendar, rulesByDescription);
 
@@ -99,12 +73,28 @@ public class SimulationsController {
 
         return new ModelAndView("simulations/list")
                 .addObject("months", months)
+                .addObject("tags", tags)
                 .addObject("descriptions", getSortedCollection(rulesByDescription.keySet()))
                 .addObject("calendar", calendar)
                 .addObject("rulesByDescription", rulesByDescription)
                 .addObject("maximumSavingsByMonth", maximumSavingsByMonth)
                 .addObject("totalsByMonth", totalsByMonth)
                 .addObject("balanceByMonth", balanceByMonth);
+    }
+
+    private List<String> getTags(Collection<Rule> rules) {
+        Map<String, Integer> tagsTmp = new MapWithDefaultValue<>(MapWithDefaultValue.ZERO_INT_VALUE_PROVIDER);
+        for (Rule rule : rules) {
+            for (String tag : rule.getTags()) {
+                tagsTmp.put(tag, tagsTmp.get(tag) + 1);
+            }
+        }
+        List<String> tags = new ArrayList<>();
+        for (Map.Entry<String, Integer> e : tagsTmp.entrySet()) {
+            tags.add(e.getKey() + " (" + e.getValue() + ")");
+        }
+        Collections.sort(tags);
+        return tags;
     }
 
     private List<YearMonth> getMonths(YearMonth minMonth, YearMonth maxMonth) {
@@ -117,8 +107,7 @@ public class SimulationsController {
 
     private void getCalendar(Collection<Amount> amounts,
                              Map<YearMonth, Map<String, Double>> calendar,
-                             Map<String, Rule> rulesByDescription)
-    {
+                             Map<String, Rule> rulesByDescription) {
         for (Amount amount : amounts) {
             LocalDate date = amount.getDate();
             String description = amount.getDescription();
@@ -131,7 +120,7 @@ public class SimulationsController {
     }
 
     private Map<YearMonth, Double> getTotalsByMonth(Map<YearMonth, Map<String, Double>> calendar, YearMonth minMonth, YearMonth maxMonth) {
-        Map<YearMonth, Double> totalsByMonth = new MapWithDefault<>(ZERO_DEFAULT);
+        Map<YearMonth, Double> totalsByMonth = new MapWithDefaultValue<>(MapWithDefaultValue.ZERO_DOUBLE_VALUE_PROVIDER);
         for (YearMonth yearMonth = minMonth; yearMonth.compareTo(maxMonth) <= 0; yearMonth = yearMonth.plusMonths(1)) {
             double totalMonth = 0.0;
             for (double v : calendar.get(yearMonth).values()) {
@@ -143,7 +132,7 @@ public class SimulationsController {
     }
 
     private Map<YearMonth, Double> getBalanceByMonth(YearMonth minMonth, YearMonth maxMonth, Map<YearMonth, Double> totalsByMonth) {
-        Map<YearMonth, Double> balanceByMonth = new MapWithDefault<>(ZERO_DEFAULT);
+        Map<YearMonth, Double> balanceByMonth = new MapWithDefaultValue<>(MapWithDefaultValue.ZERO_DOUBLE_VALUE_PROVIDER);
         double totalAcum = 0.0;
         for (YearMonth yearMonth = minMonth; yearMonth.compareTo(maxMonth) <= 0; yearMonth = yearMonth.plusMonths(1)) {
             double totalByMonth = totalsByMonth.get(yearMonth);
@@ -154,7 +143,7 @@ public class SimulationsController {
     }
 
     private Map<YearMonth, Double> getMaximumSavingsByMonth(YearMonth minMonth, YearMonth maxMonth, Map<YearMonth, Double> balanceByMonth) {
-        Map<YearMonth, Double> maximumSavingsByMonth = new MapWithDefault<>(ZERO_DEFAULT);
+        Map<YearMonth, Double> maximumSavingsByMonth = new MapWithDefaultValue<>(MapWithDefaultValue.ZERO_DOUBLE_VALUE_PROVIDER);
         double maxSavings = Double.POSITIVE_INFINITY;
 
         for (YearMonth yearMonth = maxMonth; yearMonth.compareTo(minMonth) >= 0; yearMonth = yearMonth.minusMonths(1)) {
@@ -174,10 +163,11 @@ public class SimulationsController {
         return strs;
     }
 
-    private Collection<Amount> allAmounts(LocalDate until) {
+    private Collection<Amount> allAmounts(Collection<Rule> rules, LocalDate until) {
         Collection<Amount> amounts = new ArrayList<>();
-        for (Rule rule : rulesStorageService.list()) {
-            amounts.addAll(rule.generate(until));
+        for (Rule rule : rules) {
+            Generator generator = rulesMetadataService.getGeneratorFor(rule);
+            amounts.addAll(generator.generate(until));
         }
         return amounts;
     }

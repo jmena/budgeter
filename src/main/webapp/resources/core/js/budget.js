@@ -1,9 +1,9 @@
-function deleteRule(id, callback) {
+function deleteRule(projectId, ruleId) {
     $.ajax({
-        url: '/app/rules/' + id,
+        url: '/app/projects/' + projectId + "/rules/" + ruleId,
         type: 'DELETE',
         success: function(result) {
-            $("#rule-panel-" + id).fadeOut();
+            $("#rule-panel-" + ruleId).fadeOut();
         }
     });
 }

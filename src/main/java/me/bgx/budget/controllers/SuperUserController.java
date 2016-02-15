@@ -1,4 +1,4 @@
-package me.bgx.budget.web;
+package me.bgx.budget.controllers;
 
 import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
@@ -13,8 +13,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import lombok.extern.slf4j.Slf4j;
-import me.bgx.budget.autowired.RulesStorageService;
-import me.bgx.budget.model.v1.Rule;
+import me.bgx.budget.model.services.RulesStorageService;
+import me.bgx.budget.model.data.rules.Rule;
 
 @Slf4j
 @Controller
@@ -30,12 +30,14 @@ public class SuperUserController {
 
     @RequestMapping(value = "/export", method = RequestMethod.GET)
     public ModelAndView export(HttpServletRequest req) {
-        Collection<? extends Rule> rules = rulesStorageService.list();
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String json = gson.toJson(rules);
-
-        return new ModelAndView("su/export-rules")
-                .addObject("rulesJson", json);
+        // TODO: maybe fix this method
+//        Collection<Rule> rules = rulesStorageService.list();
+//
+//        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//        String json = gson.toJson(rules);
+//
+//        return new ModelAndView("su/export-rules")
+//                .addObject("rulesJson", json);
+        return null;
     }
 }

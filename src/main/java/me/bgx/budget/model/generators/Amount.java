@@ -1,9 +1,10 @@
-package me.bgx.budget.model.v1;
+package me.bgx.budget.model.generators;
 
 import org.joda.time.LocalDate;
 
 import lombok.Builder;
 import lombok.Data;
+import me.bgx.budget.model.data.rules.Rule;
 
 @Data
 @Builder

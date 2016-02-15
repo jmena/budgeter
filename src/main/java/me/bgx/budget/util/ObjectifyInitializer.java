@@ -14,7 +14,11 @@ import com.googlecode.objectify.impl.translate.TypeKey;
 import com.googlecode.objectify.impl.translate.ValueTranslator;
 import com.googlecode.objectify.impl.translate.ValueTranslatorFactory;
 
-import me.bgx.budget.model.v1.Rule;
+import me.bgx.budget.model.data.Project;
+import me.bgx.budget.model.data.RegisteredUser;
+import me.bgx.budget.model.data.Simulation;
+import me.bgx.budget.model.data.rules.Rule;
+import me.bgx.budget.model.generators.Generator;
 import static com.googlecode.objectify.ObjectifyService.factory;
 
 public class ObjectifyInitializer {
@@ -63,6 +67,10 @@ public class ObjectifyInitializer {
     static {
         factory().getTranslators().add(new StringConstructorTranslatorFactory<>(Period.class));
         factory().getTranslators().add(new StringConstructorTranslatorFactory<>(LocalDate.class));
+
+        factory().register(Project.class);
+        factory().register(Simulation.class);
+        factory().register(RegisteredUser.class);
 
         factory().register(Rule.class);
         for (Class<?> ruleClass : Rule.ALL_RULES) {

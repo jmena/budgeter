@@ -32,7 +32,7 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
 
-                <li><a href="${pageContext.request.contextPath}/app/rules/">Rules</a></li>
+                <li><a href="${pageContext.request.contextPath}/app/projects/">Projects</a></li>
                 <li><a href="${pageContext.request.contextPath}/app/simulations/">Simulations</a></li>
                 <c:if test="${pageContext.request.user.admin}">
                     <li><a href="${pageContext.request.contextPath}/app/su/">SU</a></li>

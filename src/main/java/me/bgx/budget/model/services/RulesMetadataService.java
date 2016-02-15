@@ -1,4 +1,4 @@
-package me.bgx.budget.model.v1;
+package me.bgx.budget.model.services;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -10,41 +10,39 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.joda.time.LocalDate;
+import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Index;
 
 import lombok.Getter;
-import lombok.Setter;
+import me.bgx.budget.model.data.rules.Rule;
+import me.bgx.budget.model.generators.Generator;
+import me.bgx.budget.model.generators.GeneratorBase;
 import me.bgx.budget.util.EditorDescription;
 import me.bgx.budget.util.FieldDescription;
 import me.bgx.budget.util.IsRule;
 import me.bgx.budget.util.RuleField;
 
-@Entity
-public abstract class Rule {
-
-    public static final Collection<Class<? extends Rule>> ALL_RULES = new ImmutableList.Builder<Class<? extends Rule>>()
-            .add(MonthlyAmortizedLoad.class)
-            .add(PeriodicRule.class)
-            .add(SimpleInterestRule.class)
-            .add(SingleAmountRule.class)
-            .build();
-
-    protected static final int N_PERIODS_LIMIT = 10000;
+@Service
+public class RulesMetadataService {
 
     /**
      * All editors
      */
-    public static final Map<String, EditorDescription> EDITORS;
+    @Getter
+    private Map<String, EditorDescription> editors;
 
-    static {
-        Map<String, EditorDescription> editors = new HashMap<>();
-        for (Class<? extends Rule> clazz : ALL_RULES) {
+    private Map<Class<? extends Rule>, Class<? extends GeneratorBase>> generators;
+
+    public RulesMetadataService() {
+        initialize();
+    }
+
+    private void initialize() {
+        editors = new LinkedHashMap<>();
+        generators = new HashMap<>();
+
+        for (Class<? extends Rule> clazz : Rule.ALL_RULES) {
             List<FieldDescription> fieldDescriptions = new ArrayList<>();
             Map<String, Collection<String>> fieldsByType = new HashMap<>();
 
@@ -59,6 +57,8 @@ public abstract class Rule {
                     .fields(fieldDescriptions)
                     .build();
             editors.put(isRule.type(), editorDescription);
+
+            generators.put(clazz, isRule.generator());
         }
         editors = sortLinkedHashMap(editors, new Comparator<Map.Entry<String, EditorDescription>>() {
             @Override
@@ -66,10 +66,9 @@ public abstract class Rule {
                 return o1.getValue().getLabel().compareTo(o2.getValue().getLabel());
             }
         });
-        EDITORS = Collections.unmodifiableMap(editors);
     }
 
-    private static void getAllFields(Class<?> clazz, List<FieldDescription> fieldDescriptions, Map<String, Collection<String>> fieldsByType) {
+    private void getAllFields(Class<?> clazz, List<FieldDescription> fieldDescriptions, Map<String, Collection<String>> fieldsByType) {
         for (; clazz != null; clazz = clazz.getSuperclass()) {
             getAllFieldsAux(clazz, fieldDescriptions, fieldsByType);
         }
@@ -83,7 +82,7 @@ public abstract class Rule {
     }
 
     // don't use this method. use getAllFields. Get all fields of the class clazz.
-    private static void getAllFieldsAux(Class<?> clazz, List<FieldDescription> fieldDescriptions, Map<String, Collection<String>> fieldsByType) {
+    private void getAllFieldsAux(Class<?> clazz, List<FieldDescription> fieldDescriptions, Map<String, Collection<String>> fieldsByType) {
         if (clazz == null) {
             return;
         }
@@ -117,54 +116,19 @@ public abstract class Rule {
         }
     }
 
-    private static <K,V> Map<K,V> sortLinkedHashMap(Map<K,V> map, Comparator<Map.Entry<K,V>> c) {
-        List<Map.Entry<K,V>> entries = new ArrayList<>(map.entrySet());
+    private <K, V> Map<K, V> sortLinkedHashMap(Map<K, V> map, Comparator<Map.Entry<K, V>> c) {
+        List<Map.Entry<K, V>> entries = new ArrayList<>(map.entrySet());
         Collections.sort(entries, c);
-        Map<K,V> sortedMap = new LinkedHashMap<>();
+        Map<K, V> sortedMap = new LinkedHashMap<>();
         for (Map.Entry<K, V> entry : entries) {
             sortedMap.put(entry.getKey(), entry.getValue());
         }
         return sortedMap;
     }
 
-    @Setter
-    @Getter
-    @Index
-    private String userId;
-
-    @Id
-    @Setter
-    @Getter
-    private String id;
-
-    @Setter
-    @Getter
-    @RuleField(label = "Name", order = 1)
-    private String name;
-
-    @Setter
-    @Getter
-    @RuleField(label = "Tags", type = "tags", order = 2)
-    private List<String> tags;
-
-    @Setter
-    @Getter
-    @RuleField(label = "Notes", type = "textarea", order = 100)
-    private String notes;
-
-    public final String getType() {
-        return getClass().getAnnotation(IsRule.class).type();
-    }
-
-    public final String getLabel() {
-        return getClass().getAnnotation(IsRule.class).label();
-    }
-
-    public abstract Collection<Amount> generate(LocalDate until);
-
-    public static Rule newInstanceFromType(String ruleType) {
+    public Rule newRuleFromType(String ruleType) {
         try {
-            Rule rule = EDITORS.get(ruleType).getClazz().newInstance();
+            Rule rule = editors.get(ruleType).getClazz().newInstance();
             rule.setId("new");
             return rule;
         } catch (Exception e) {
@@ -172,32 +136,28 @@ public abstract class Rule {
         }
     }
 
-    protected void generatePaymentInterestAmount(boolean detailed, LocalDate date, double capitalContribution, double interest, Collection<Amount> amounts) {
-        if (detailed) {
-            amounts.add(Amount.builder()
-                    .date(date)
-                    .rule(this)
-                    .description(name + " - capital contribution")
-                    .amount(capitalContribution)
-                    .build());
+    public Collection<String> getProperties(String type, String property) {
+        EditorDescription editorDescription = editors.get(type);
+        if (editorDescription == null) {
+            throw new RuntimeException("Editor doesn't exist: " + type);
+        }
+        Collection<String> properties = editorDescription.getFieldsByType().get(property);
+        return (properties == null) ? Collections.<String>emptyList() : properties;
+    }
 
-            amounts.add(Amount.builder()
-                    .date(date)
-                    .rule(this)
-                    .description(name + " - interest")
-                    .amount(interest)
-                    .build());
-        } else {
-            amounts.add(Amount.builder()
-                    .date(date)
-                    .rule(this)
-                    .description(name)
-                    .amount(capitalContribution + interest)
-                    .build());
+    public Generator getGeneratorFor(Rule rule) {
+        Class<? extends GeneratorBase> generatorClass = generators.get(rule.getClass());
+        try {
+            GeneratorBase<?> generatorBase = generatorClass.newInstance();
+            generatorBase.setRule(rule);
+            return generatorBase;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
-    protected boolean loopOutOfLimits(LocalDate date, LocalDate until) {
-        return (until != null && date.compareTo(until) > 0);
+    public Collection<FieldDescription> getFields(String type) {
+        return editors.get(type).getFields();
     }
+
 }

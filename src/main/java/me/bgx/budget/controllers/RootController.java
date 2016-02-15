@@ -1,4 +1,4 @@
-package me.bgx.budget.web;
+package me.bgx.budget.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

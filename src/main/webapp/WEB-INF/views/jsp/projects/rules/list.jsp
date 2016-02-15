@@ -9,7 +9,7 @@
         <div id="rule-panel-${rule.id}" class="panel panel-default">
             <div class="panel-body">
                 <div class="col-md-11">
-                    <a href="/app/rules/${rule.type}/${rule.id}">
+                    <a href="/app/projects/{project.id}/rules/${rule.type}/${rule.id}">
                         <h4>${(empty rule.name) ? '<i>no name</i>' : rule.name}</h4>
                     </a>
                     <span>${rule.label}</span>
@@ -25,5 +25,10 @@
 
     </c:forEach>
 
-    <a href="/app/rules/new"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> New rule...</a>
+    <div class="row">
+        <div class="col-sm-12">
+            <a href="/app/rules/new"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> New rule...</a>
+        </div>
+    </div>
+
 </deco:container>

@@ -26,7 +26,7 @@
         </div>
     </c:if>
 
-    <form:form modelAttribute="rule" action="/app/rules/${rule.type}/${rule.id}" cssClass="form-horizontal">
+    <form:form modelAttribute="rule" action="/app/projects/${projectId}/rules/${rule.type}/${rule.id}" cssClass="form-horizontal">
 
         <form:hidden path="id" />
 
@@ -35,7 +35,7 @@
         </c:forEach>
 
         <button type="submit" class="btn btn-primary">Save</button>
-        <a href="/app/rules">Go back</a>
+        <a href="/app/projects/${projectId}">Go back</a>
     </form:form>
 
 
